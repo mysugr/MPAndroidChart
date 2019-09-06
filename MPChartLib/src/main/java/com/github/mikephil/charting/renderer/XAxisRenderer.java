@@ -343,7 +343,7 @@ public class XAxisRenderer extends AxisRenderer {
         mLimitLineSegmentsBuffer[0] = position[0];
         mLimitLineSegmentsBuffer[1] = mViewPortHandler.contentTop();
         mLimitLineSegmentsBuffer[2] = position[0];
-        mLimitLineSegmentsBuffer[3] = mViewPortHandler.contentBottom();
+        mLimitLineSegmentsBuffer[3] = mViewPortHandler.contentBottom() - limitLine.getLineBottomPadding();
 
         mLimitLinePath.reset();
         mLimitLinePath.moveTo(mLimitLineSegmentsBuffer[0], mLimitLineSegmentsBuffer[1]);
@@ -364,11 +364,13 @@ public class XAxisRenderer extends AxisRenderer {
         if (label != null && !label.equals("")) {
 
             mLimitLinePaint.setStyle(limitLine.getTextStyle());
+            if (limitLine.getTypeface() != null) {
+                mLimitLinePaint.setTypeface(limitLine.getTypeface());
+            }
             mLimitLinePaint.setPathEffect(null);
             mLimitLinePaint.setColor(limitLine.getTextColor());
             mLimitLinePaint.setStrokeWidth(0.5f);
             mLimitLinePaint.setTextSize(limitLine.getTextSize());
-
 
             float xOffset = limitLine.getLineWidth() + limitLine.getXOffset();
 
@@ -376,9 +378,16 @@ public class XAxisRenderer extends AxisRenderer {
 
             if (labelPosition == LimitLine.LimitLabelPosition.RIGHT_TOP) {
 
-                final float labelLineHeight = Utils.calcTextHeight(mLimitLinePaint, label);
+                final float labelHeight = Utils.calcTextHeight(mLimitLinePaint, label);
                 mLimitLinePaint.setTextAlign(Align.LEFT);
-                c.drawText(label, position[0] + xOffset, mViewPortHandler.contentTop() + yOffset + labelLineHeight,
+                c.drawText(label, position[0] + xOffset, mViewPortHandler.contentTop() + yOffset + labelHeight,
+                        mLimitLinePaint);
+            } else if (labelPosition == LimitLine.LimitLabelPosition.CENTER_BOTTOM) {
+
+                final float labelHeight = Utils.calcTextHeight(mLimitLinePaint, label);
+                mLimitLinePaint.setTextAlign(Align.CENTER);
+                float textYOffset = limitLine.getLineBottomPadding() > 0 ? limitLine.getLineBottomPadding() / 2f : labelHeight / 2;
+                c.drawText(label, position[0], mViewPortHandler.contentBottom() + yOffset - textYOffset,
                         mLimitLinePaint);
             } else if (labelPosition == LimitLine.LimitLabelPosition.RIGHT_BOTTOM) {
 
