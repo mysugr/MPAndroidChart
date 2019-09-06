@@ -8,6 +8,7 @@ import com.github.mikephil.charting.renderer.scatter.ChevronUpShapeRenderer;
 import com.github.mikephil.charting.renderer.scatter.CircleShapeRenderer;
 import com.github.mikephil.charting.renderer.scatter.CrossShapeRenderer;
 import com.github.mikephil.charting.renderer.scatter.IShapeRenderer;
+import com.github.mikephil.charting.renderer.scatter.InvisibleShapeRenderer;
 import com.github.mikephil.charting.renderer.scatter.SquareShapeRenderer;
 import com.github.mikephil.charting.renderer.scatter.TriangleShapeRenderer;
 import com.github.mikephil.charting.renderer.scatter.XShapeRenderer;
@@ -16,7 +17,9 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScatterDataSet extends LineScatterCandleRadarDataSet<Entry> implements IScatterDataSet {
+public class ScatterDataSet
+    extends LineScatterCandleRadarDataSet<Entry>
+    implements IScatterDataSet {
 
     /**
      * the size the scattershape will have, in density pixels
@@ -150,6 +153,8 @@ public class ScatterDataSet extends LineScatterCandleRadarDataSet<Entry> impleme
                 return new ChevronUpShapeRenderer();
             case CHEVRON_DOWN:
                 return new ChevronDownShapeRenderer();
+            case INVISIBLE:
+                return new InvisibleShapeRenderer();
         }
 
         return null;

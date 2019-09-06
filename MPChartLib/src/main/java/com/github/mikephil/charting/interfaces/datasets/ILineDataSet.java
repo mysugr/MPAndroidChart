@@ -9,7 +9,8 @@ import com.github.mikephil.charting.formatter.IFillFormatter;
 /**
  * Created by Philpp Jahoda on 21/10/15.
  */
-public interface ILineDataSet extends ILineRadarDataSet<Entry> {
+public interface ILineDataSet
+    extends ILineRadarDataSet<Entry> {
 
     /**
      * Returns the drawing mode for this line dataset
@@ -100,4 +101,8 @@ public interface ILineDataSet extends ILineRadarDataSet<Entry> {
      * @return
      */
     IFillFormatter getFillFormatter();
+
+    int[] getRangeColors();
+
+    float[] getRangeValues();
 }
