@@ -101,11 +101,6 @@ public abstract class Utils {
     public static float convertDpToPixel(float dp) {
 
         if (mMetrics == null) {
-
-            Log.e("MPChartLib-Utils",
-                    "Utils NOT INITIALIZED. You need to call Utils.init(...) at least once before" +
-                            " calling Utils.convertDpToPixel(...). Otherwise conversion does not " +
-                            "take place.");
             return dp;
         }
 
@@ -525,8 +520,8 @@ public abstract class Utils {
 
     public static void drawImage(Canvas canvas,
                                  Drawable drawable,
-                                 int x, int y,
-                                 int width, int height) {
+                                 float x, float y,
+                                 float width, float height) {
 
         MPPointF drawOffset = MPPointF.getInstance();
         drawOffset.x = x - (width / 2);
@@ -536,8 +531,8 @@ public abstract class Utils {
         drawable.setBounds(
                 mDrawableBoundsCache.left,
                 mDrawableBoundsCache.top,
-                mDrawableBoundsCache.left + width,
-                mDrawableBoundsCache.top + width);
+                mDrawableBoundsCache.left + (int)width,
+                mDrawableBoundsCache.top + (int) width);
 
         int saveId = canvas.save();
         // translate to the correct position and draw
@@ -770,6 +765,6 @@ public abstract class Utils {
     }
 
     public static int getSDKInt() {
-        return android.os.Build.VERSION.SDK_INT;
+        return Build.VERSION.SDK_INT;
     }
 }
