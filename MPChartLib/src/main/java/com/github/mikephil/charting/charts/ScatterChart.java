@@ -57,6 +57,7 @@ public class ScatterChart extends BarLineChartBase<ScatterData> implements Scatt
         CROSS("CROSS"),
         X("X"),
         CHEVRON_UP("CHEVRON_UP"),
+        INVISIBLE("INVISIBLE"),
         CHEVRON_DOWN("CHEVRON_DOWN");
 
         private final String shapeIdentifier;
