@@ -4,9 +4,9 @@ buildscript {
             org    : 'mysugr',
             lib    : 'MPAndroidChart',
             group  : 'com.mysugr',
-            site   : 'https://github.com/mysugr/sweetest',
-            git    : 'https://github.com/mysugr/sweetest.git',
-            tracker: 'https://github.com/mysugr/sweetest/issues'
+            site   : 'https://github.com/mysugr/MPAndroidChart',
+            git    : 'https://github.com/mysugr/MPAndroidChart.git',
+            tracker: 'https://github.com/mysugr/MPAndroidChart/issues'
     ]
     repositories {
         google()
