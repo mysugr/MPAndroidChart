@@ -1,7 +1,30 @@
+buildscript {
+    ext.publishingInfo = [
+            version: '3.1.0-mysugr-1',
+            org    : 'mysugr',
+            lib    : 'MPAndroidChart',
+            group  : 'com.mysugr',
+            site   : 'https://github.com/mysugr/sweetest',
+            git    : 'https://github.com/mysugr/sweetest.git',
+            tracker: 'https://github.com/mysugr/sweetest/issues'
+    ]
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
+        classpath "com.github.dcendents:android-maven-gradle-plugin:2.1"
+    }
+}
+
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
+apply from: 'publish-bintray.gradle'
+apply from: 'publish-maven.gradle'
 
-group='com.github.philjay'
+group="${publishingInfo.group}.${publishingInfo.lib}"
+version publishingInfo.version
 
 android {
     compileSdkVersion 28
