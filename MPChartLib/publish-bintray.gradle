@@ -1,14 +1,15 @@
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
-Properties properties = new Properties()
-if (rootProject.file('local.properties').exists()) {
-    properties.load(rootProject.file('local.properties').newDataInputStream())
-}
-
 bintray {
-    user properties.getProperty('bintray_user')
-    key properties.getProperty('bintray_key')
+
+    Properties properties = new Properties()
+    if (rootProject.file('local.properties').exists()) {
+        properties.load(rootProject.file('local.properties').newDataInputStream())
+    }
+
+    user properties['bintray_user']
+    key properties['bintray_key']
     configurations = ['archives']
     pkg {
         repo = 'maven'

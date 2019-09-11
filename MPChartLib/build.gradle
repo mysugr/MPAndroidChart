@@ -1,27 +1,41 @@
 buildscript {
+
+    Properties properties = new Properties()
+    if (rootProject.file('local.properties').exists()) {
+        properties.load(rootProject.file('local.properties').newDataInputStream())
+    }
+
     ext.publishingInfo = [
-            version: '3.1.0-mysugr-1',
-            org    : 'mysugr',
-            lib    : 'MPAndroidChart',
-            group  : 'com.mysugr',
-            site   : 'https://github.com/mysugr/MPAndroidChart',
-            git    : 'https://github.com/mysugr/MPAndroidChart.git',
-            tracker: 'https://github.com/mysugr/MPAndroidChart/issues'
+            version      : '3.1.0.mysugr.1',
+            org          : 'mysugr',
+            lib          : 'MPAndroidChart-mysugr',
+            group        : 'com.github.PhilJay',
+            site         : 'https://github.com/mysugr/MPAndroidChart',
+            git          : 'scm:git@github.com/mysugr/MPAndroidChart.git',
+            tracker      : 'https://github.com/mysugr/MPAndroidChart/issues',
+            jfrogUrl     : 'https://mysugr.jfrog.io/mysugr/mysugr-release-local',
+            jfrogUsername: properties['jfrog.username'],
+            jfrogPassword: properties['jfrog.accesstoken']
     ]
+
+    // For deployment to Artifactory:
+    ext['signing.keyId'] = properties['GPG.keyId']
+    ext['signing.secretKeyRingFile'] = rootProject.file(properties['GPG.secretKeyRingFile'])
+    ext['signing.password'] = properties['GPG.password']
+    ext['signing.keyId'] = properties['GPG.keyId']
+
     repositories {
         google()
         jcenter()
     }
+
     dependencies {
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
-        classpath "com.github.dcendents:android-maven-gradle-plugin:2.1"
     }
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
 apply from: 'publish-bintray.gradle'
-apply from: 'publish-maven.gradle'
 
 group="${publishingInfo.group}.${publishingInfo.lib}"
 version publishingInfo.version
@@ -51,10 +65,10 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
-task sourcesJar(type: Jar) {
+/*task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
     classifier = 'sources'
-}
+}*/
 
 task javadoc(type: Javadoc) {
     options.charSet = 'UTF-8'
@@ -68,7 +82,9 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-artifacts {
+/*artifacts { // TODO was double?
     archives sourcesJar
     archives javadocJar
-}
+}*/
+
+apply from: 'publish-maven.gradle'

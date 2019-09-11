@@ -1,18 +1,119 @@
-/**
- * Added for local maven publishing
- */
-
-//apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
+/**
+ * Adds a task dependency to a given target task, so that the given task
+ * depends on the given name after this function returned.
+ */
+ext.addTaskDependency = { targetTask, name ->
+    targetTask.dependsOn += name
+}
+
+
+// A function to run on a collection of dependencies, which fills the dependency section of the pom.xml
+// The xml node containing the dependencies is expected as a parameter (dependenciesNode)
+ext.processMavenDependencies = { dependency, dependenciesNode ->
+    if (dependency instanceof ExternalDependency) {
+        def dependencyNode = dependenciesNode.appendNode('dependency')
+        dependencyNode.appendNode('groupId', dependency.group)
+        dependencyNode.appendNode('artifactId', dependency.name)
+        dependencyNode.appendNode('version', dependency.version)
+    } else if (dependency instanceof ProjectDependency) {
+        def dependencyNode = dependenciesNode.appendNode('dependency')
+        if (dependency.dependencyProject.hasProperty("publishingInfo")) {
+            def publishingInfo =dependency.dependencyProject.publishingInfo
+            dependencyNode.appendNode('groupId', publishingInfo.group)
+            dependencyNode.appendNode('artifactId', publishingInfo.lib)
+            dependencyNode.appendNode('version', publishingInfo.version)
+            if (isAndroidLibrary(dependency.dependencyProject))
+                dependencyNode.appendNode('type', 'aar')
+            else if (isJavaLibrary(dependency.dependencyProject))
+                dependencyNode.appendNode('type', 'jar')
+        } else {
+            throw new IllegalStateException("ProjectDependency $dependency doesn't have required maven properties")
+        }
+    }
+}
+
+// Configure the destination repository with
+// S3 URL and access credentials
 publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            //from components.java
-            artifactId publishingInfo.lib
-            artifact sourcesJar
-            artifact javadocJar
+    repositories {
+        maven {
+            url publishingInfo.jfrogUrl
+            credentials {
+                username publishingInfo.jfrogUsername
+                password publishingInfo.jfrogPassword
+            }
+        }
+    }
+}
+
+project.afterEvaluate {
+    publishing {
+        publications.each { publication ->
+            publication.artifact sourcesJar
+            publication.pom {
+                url = publishingInfo.site
+                scm {
+                    connection = publishingInfo.git
+                    url = publishingInfo.site
+                }
+            }
+        }
+    }
+
+    signing {
+        publishing.publications.all {
+            if (!it.version.contains("-dev"))
+                sign it
+        }
+    }
+}
+
+tasks.create(name: "sourcesJar", type: Jar) {
+    from android.sourceSets.main.getJavaDirectories()
+    classifier = 'sources'
+}
+
+// Loop over all variants
+android.libraryVariants.all { variant ->
+    // This creates a publication for each variant
+    publishing.publications.create(variant.name, MavenPublication) {
+        groupId = project.ext.publishingInfo.group
+        artifactId = project.ext.publishingInfo.lib
+        version = project.ext.publishingInfo.version + (variant.buildType.versionNameSuffix ?: "")
+
+        artifact source: getPackageLibraryProvider().get().outputs.files[0]
+
+        pom.withXml {
+            // add the android maven plugin
+            def pluginNode = asNode().appendNode('build').appendNode('plugins').appendNode('plugin')
+            pluginNode.appendNode('groupId', 'com.simpligility.maven.plugins')
+            pluginNode.appendNode('artifactId', 'android-maven-plugin')
+            pluginNode.appendNode('version', '4.5.0')
+            pluginNode.appendNode('extensions', 'true')
+
+            // append the dependencies
+            def dependenciesNode = asNode().appendNode('dependencies')
+            // Go through all the dependencies and add them to the POM file as dependencies
+            configurations.getByName(variant.name + "CompileClasspath").allDependencies.all {
+                processMavenDependencies(it, dependenciesNode)
+            }
+        }
+    }
+
+    // Ensure that the publish tasks depends on (the right) assembly
+    tasks.all { task ->
+        if (task instanceof AbstractPublishToMaven && task.name.matches("publish${variant.name.capitalize()}PublicationTo.+(Local|Repository)")) {
+            addTaskDependency(task, "$project.path:assemble${variant.name.capitalize()}")
+        }
+    }
+
+    tasks.whenTaskAdded { t ->
+        if (t.name == "signReleasePublication") {
+            t.dependsOn assemble
+            t.dependsOn sourcesJar
         }
     }
 }
