@@ -15,12 +15,14 @@ import com.github.mikephil.charting.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet {
+public class LineDataSet
+    extends LineRadarDataSet<Entry>
+    implements ILineDataSet {
 
     /**
      * Drawing mode for this line dataset
      **/
-    private LineDataSet.Mode mMode = Mode.LINEAR;
+    private Mode mMode = Mode.LINEAR;
 
     /**
      * List representing all colors that are used for the circles
@@ -63,6 +65,10 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
     private boolean mDrawCircles = true;
 
     private boolean mDrawCircleHole = true;
+
+    private int[] rangeColors = new int[1];
+
+    private float[] rangeValues = new float[1];
 
 
     public LineDataSet(List<Entry> yVals, String label) {
@@ -113,7 +119,7 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
      * @return
      */
     @Override
-    public LineDataSet.Mode getMode() {
+    public Mode getMode() {
         return mMode;
     }
 
@@ -122,7 +128,7 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
      *
      * @return
      */
-    public void setMode(LineDataSet.Mode mode) {
+    public void setMode(Mode mode) {
         mMode = mode;
     }
 
@@ -134,10 +140,12 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
      */
     public void setCubicIntensity(float intensity) {
 
-        if (intensity > 1f)
+        if (intensity > 1f) {
             intensity = 1f;
-        if (intensity < 0.05f)
+        }
+        if (intensity < 0.05f) {
             intensity = 0.05f;
+        }
 
         mCubicIntensity = intensity;
     }
@@ -220,7 +228,7 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
      */
     public void enableDashedLine(float lineLength, float spaceLength, float phase) {
         mDashPathEffect = new DashPathEffect(new float[]{
-                lineLength, spaceLength
+            lineLength, spaceLength
         }, phase);
     }
 
@@ -396,16 +404,34 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
      * @param formatter
      */
     public void setFillFormatter(IFillFormatter formatter) {
-
-        if (formatter == null)
+        if (formatter == null) {
             mFillFormatter = new DefaultFillFormatter();
-        else
+        } else {
             mFillFormatter = formatter;
+        }
     }
 
     @Override
     public IFillFormatter getFillFormatter() {
         return mFillFormatter;
+    }
+
+    @Override
+    public int[] getRangeColors() {
+        return rangeColors;
+    }
+
+    public void setRangeColors(int[] rangeColors) {
+        this.rangeColors = rangeColors;
+    }
+
+    @Override
+    public float[] getRangeValues() {
+        return rangeValues;
+    }
+
+    public void setRangeValues(float[] rangeValues) {
+        this.rangeValues = rangeValues;
     }
 
     public enum Mode {

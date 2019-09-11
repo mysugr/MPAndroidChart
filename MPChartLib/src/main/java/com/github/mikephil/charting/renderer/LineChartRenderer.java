@@ -3,12 +3,15 @@ package com.github.mikephil.charting.renderer;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 
 import com.github.mikephil.charting.animation.ChartAnimator;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -25,10 +28,12 @@ import com.github.mikephil.charting.utils.Utils;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-public class LineChartRenderer extends LineRadarRenderer {
+public class LineChartRenderer
+    extends LineRadarRenderer {
 
     protected LineDataProvider mChart;
 
@@ -57,6 +62,8 @@ public class LineChartRenderer extends LineRadarRenderer {
     protected Path cubicPath = new Path();
     protected Path cubicFillPath = new Path();
 
+    protected Shader linearGradient = null;
+
     public LineChartRenderer(LineDataProvider chart, ChartAnimator animator,
                              ViewPortHandler viewPortHandler) {
         super(animator, viewPortHandler);
@@ -80,15 +87,16 @@ public class LineChartRenderer extends LineRadarRenderer {
         Bitmap drawBitmap = mDrawBitmap == null ? null : mDrawBitmap.get();
 
         if (drawBitmap == null
-                || (drawBitmap.getWidth() != width)
-                || (drawBitmap.getHeight() != height)) {
+            || (drawBitmap.getWidth() != width)
+            || (drawBitmap.getHeight() != height)) {
 
             if (width > 0 && height > 0) {
                 drawBitmap = Bitmap.createBitmap(width, height, mBitmapConfig);
                 mDrawBitmap = new WeakReference<>(drawBitmap);
                 mBitmapCanvas = new Canvas(drawBitmap);
-            } else
+            } else {
                 return;
+            }
         }
 
         drawBitmap.eraseColor(Color.TRANSPARENT);
@@ -97,8 +105,10 @@ public class LineChartRenderer extends LineRadarRenderer {
 
         for (ILineDataSet set : lineData.getDataSets()) {
 
-            if (set.isVisible())
+            if (set.isVisible()) {
                 drawDataSet(c, set);
+                drawCircles(c);
+            }
         }
 
         c.drawBitmap(drawBitmap, 0, 0, mRenderPaint);
@@ -106,8 +116,9 @@ public class LineChartRenderer extends LineRadarRenderer {
 
     protected void drawDataSet(Canvas c, ILineDataSet dataSet) {
 
-        if (dataSet.getEntryCount() < 1)
+        if (dataSet.getEntryCount() < 1) {
             return;
+        }
 
         mRenderPaint.setStrokeWidth(dataSet.getLineWidth());
         mRenderPaint.setPathEffect(dataSet.getDashPathEffect());
@@ -155,12 +166,12 @@ public class LineChartRenderer extends LineRadarRenderer {
                 cur = dataSet.getEntryForIndex(j);
 
                 final float cpx = (prev.getX())
-                        + (cur.getX() - prev.getX()) / 2.0f;
+                    + (cur.getX() - prev.getX()) / 2.0f;
 
                 cubicPath.cubicTo(
-                        cpx, prev.getY() * phaseY,
-                        cpx, cur.getY() * phaseY,
-                        cur.getX(), cur.getY() * phaseY);
+                    cpx, prev.getY() * phaseY,
+                    cpx, cur.getY() * phaseY,
+                    cur.getX(), cur.getY() * phaseY);
             }
         }
 
@@ -237,8 +248,8 @@ public class LineChartRenderer extends LineRadarRenderer {
                 curDy = (next.getY() - prev.getY()) * intensity;
 
                 cubicPath.cubicTo(prev.getX() + prevDx, (prev.getY() + prevDy) * phaseY,
-                        cur.getX() - curDx,
-                        (cur.getY() - curDy) * phaseY, cur.getX(), cur.getY() * phaseY);
+                    cur.getX() - curDx,
+                    (cur.getY() - curDy) * phaseY, cur.getX(), cur.getY() * phaseY);
             }
         }
 
@@ -251,9 +262,15 @@ public class LineChartRenderer extends LineRadarRenderer {
             drawCubicFill(mBitmapCanvas, dataSet, cubicFillPath, trans, mXBounds);
         }
 
-        mRenderPaint.setColor(dataSet.getColor());
+        if (dataSet.getRangeValues() != null && dataSet.getRangeValues().length >= 4) {
+            Shader shader = getGradientShader(dataSet);
+            mRenderPaint.setShader(shader);
+        } else {
+            mRenderPaint.setColor(dataSet.getColor());
+        }
 
         mRenderPaint.setStyle(Paint.Style.STROKE);
+        mRenderPaint.setStrokeCap(Paint.Cap.ROUND);
 
         trans.pathValueToPixel(cubicPath);
 
@@ -262,10 +279,57 @@ public class LineChartRenderer extends LineRadarRenderer {
         mRenderPaint.setPathEffect(null);
     }
 
+    private Shader getGradientShader(ILineDataSet dataSet) {
+        if (linearGradient == null || hasShaderChanged(dataSet)) {
+
+            cacheShaderCalcValues(dataSet);
+
+            float chartMaxY = mChart.getAxis(YAxis.AxisDependency.LEFT).mAxisMaximum;
+            float chartMinY = mChart.getAxis(YAxis.AxisDependency.LEFT).mAxisMinimum;
+            float range = chartMaxY - chartMinY;
+
+            float[] rangeValues = dataSet.getRangeValues();
+            float hyperGlucoseLimit = rangeValues[0];
+            float outOfRangeMax = rangeValues[1];
+            float outOfRangeMin = rangeValues[2];
+            float hypoGlucoseLimit = rangeValues[3];
+
+            // this gives us the percentage of the lower range, we want to color the upper,
+            // so we invert the percentage by subtracting from 1
+            float hyperCutoff = 1 - ((hyperGlucoseLimit - chartMinY) / range);
+            float upperRangeCutoff = 1 - ((outOfRangeMax - chartMinY) / range);
+            float lowerRangeCutoff = 1 - ((outOfRangeMin - chartMinY) / range);
+            float hypoCutOff = 1 - ((hypoGlucoseLimit - chartMinY) / range);
+
+            int redColor = dataSet.getRangeColors()[0];
+            int orangeColor = dataSet.getRangeColors()[1];
+            int inRangeColor = dataSet.getRangeColors()[2];
+
+            linearGradient = new LinearGradient(0, 0, 0, mChart.getHeight(),
+                new int[]{redColor, orangeColor, orangeColor, inRangeColor, inRangeColor, orangeColor, orangeColor, redColor},
+                new float[]{hyperCutoff - 0.01f, hyperCutoff, upperRangeCutoff - 0.01f, upperRangeCutoff,
+                    lowerRangeCutoff, lowerRangeCutoff + 0.01f, hypoCutOff, hypoCutOff + 0.01f},
+                Shader.TileMode.CLAMP);
+        }
+        return linearGradient;
+    }
+
+    private int lastChartHeight = 0;
+    private float[] lastRangeValues = new float[1];
+
+    private boolean hasShaderChanged(ILineDataSet dataSet) {
+        return mChart.getHeight() != lastChartHeight || !Arrays.equals(lastRangeValues, dataSet.getRangeValues());
+    }
+
+    private void cacheShaderCalcValues(ILineDataSet dataSet) {
+        lastChartHeight = mChart.getHeight();
+        lastRangeValues = dataSet.getRangeValues();
+    }
+
     protected void drawCubicFill(Canvas c, ILineDataSet dataSet, Path spline, Transformer trans, XBounds bounds) {
 
         float fillMin = dataSet.getFillFormatter()
-                .getFillLinePosition(dataSet, mChart);
+            .getFillLinePosition(dataSet, mChart);
 
         spline.lineTo(dataSet.getEntryForIndex(bounds.min + bounds.range).getX(), fillMin);
         spline.lineTo(dataSet.getEntryForIndex(bounds.min).getX(), fillMin);
@@ -323,8 +387,9 @@ public class LineChartRenderer extends LineRadarRenderer {
         // more than 1 color
         if (dataSet.getColors().size() > 1) {
 
-            if (mLineBuffer.length <= pointsPerEntryPair * 2)
+            if (mLineBuffer.length <= pointsPerEntryPair * 2) {
                 mLineBuffer = new float[pointsPerEntryPair * 4];
+            }
 
             for (int j = mXBounds.min; j <= mXBounds.range + mXBounds.min; j++) {
 
@@ -359,15 +424,17 @@ public class LineChartRenderer extends LineRadarRenderer {
 
                 trans.pointValuesToPixel(mLineBuffer);
 
-                if (!mViewPortHandler.isInBoundsRight(mLineBuffer[0]))
+                if (!mViewPortHandler.isInBoundsRight(mLineBuffer[0])) {
                     break;
+                }
 
                 // make sure the lines don't do shitty things outside
                 // bounds
                 if (!mViewPortHandler.isInBoundsLeft(mLineBuffer[2])
-                        || (!mViewPortHandler.isInBoundsTop(mLineBuffer[1]) && !mViewPortHandler
-                        .isInBoundsBottom(mLineBuffer[3])))
+                    || (!mViewPortHandler.isInBoundsTop(mLineBuffer[1]) && !mViewPortHandler
+                    .isInBoundsBottom(mLineBuffer[3]))) {
                     continue;
+                }
 
                 // get the color that is set for this line-segment
                 mRenderPaint.setColor(dataSet.getColor(j));
@@ -377,8 +444,9 @@ public class LineChartRenderer extends LineRadarRenderer {
 
         } else { // only one color per dataset
 
-            if (mLineBuffer.length < Math.max((entryCount) * pointsPerEntryPair, pointsPerEntryPair) * 2)
+            if (mLineBuffer.length < Math.max((entryCount) * pointsPerEntryPair, pointsPerEntryPair) * 2) {
                 mLineBuffer = new float[Math.max((entryCount) * pointsPerEntryPair, pointsPerEntryPair) * 4];
+            }
 
             Entry e1, e2;
 
@@ -530,8 +598,9 @@ public class LineChartRenderer extends LineRadarRenderer {
 
                 ILineDataSet dataSet = dataSets.get(i);
 
-                if (!shouldDrawValues(dataSet) || dataSet.getEntryCount() < 1)
+                if (!shouldDrawValues(dataSet) || dataSet.getEntryCount() < 1) {
                     continue;
+                }
 
                 // apply the text-styling defined by the DataSet
                 applyValueTextStyle(dataSet);
@@ -541,13 +610,14 @@ public class LineChartRenderer extends LineRadarRenderer {
                 // make sure the values do not interfear with the circles
                 int valOffset = (int) (dataSet.getCircleRadius() * 1.75f);
 
-                if (!dataSet.isDrawCirclesEnabled())
+                if (!dataSet.isDrawCirclesEnabled()) {
                     valOffset = valOffset / 2;
+                }
 
                 mXBounds.set(mChart, dataSet);
 
                 float[] positions = trans.generateTransformedValuesLine(dataSet, mAnimator.getPhaseX(), mAnimator
-                        .getPhaseY(), mXBounds.min, mXBounds.max);
+                    .getPhaseY(), mXBounds.min, mXBounds.max);
                 ValueFormatter formatter = dataSet.getValueFormatter();
 
                 MPPointF iconsOffset = MPPointF.getInstance(dataSet.getIconsOffset());
@@ -559,11 +629,13 @@ public class LineChartRenderer extends LineRadarRenderer {
                     float x = positions[j];
                     float y = positions[j + 1];
 
-                    if (!mViewPortHandler.isInBoundsRight(x))
+                    if (!mViewPortHandler.isInBoundsRight(x)) {
                         break;
+                    }
 
-                    if (!mViewPortHandler.isInBoundsLeft(x) || !mViewPortHandler.isInBoundsY(y))
+                    if (!mViewPortHandler.isInBoundsLeft(x) || !mViewPortHandler.isInBoundsY(y)) {
                         continue;
+                    }
 
                     Entry entry = dataSet.getEntryForIndex(j / 2 + mXBounds.min);
 
@@ -576,12 +648,12 @@ public class LineChartRenderer extends LineRadarRenderer {
                         Drawable icon = entry.getIcon();
 
                         Utils.drawImage(
-                                c,
-                                icon,
-                                (int)(x + iconsOffset.x),
-                                (int)(y + iconsOffset.y),
-                                icon.getIntrinsicWidth(),
-                                icon.getIntrinsicHeight());
+                            c,
+                            icon,
+                            (int) (x + iconsOffset.x),
+                            (int) (y + iconsOffset.y),
+                            icon.getIntrinsicWidth(),
+                            icon.getIntrinsicHeight());
                     }
                 }
 
@@ -598,13 +670,13 @@ public class LineChartRenderer extends LineRadarRenderer {
 
     @Override
     public void drawExtras(Canvas c) {
-        drawCircles(c);
+        // do nothing, line end circles are drawn with the line
     }
 
     /**
      * cache for the circle bitmaps of all datasets
      */
-    private HashMap<IDataSet, DataSetImageCache> mImageCaches = new HashMap<>();
+    private HashMap<IDataSet,DataSetImageCache> mImageCaches = new HashMap<>();
 
     /**
      * buffer for drawing the circles
@@ -627,8 +699,9 @@ public class LineChartRenderer extends LineRadarRenderer {
             ILineDataSet dataSet = dataSets.get(i);
 
             if (!dataSet.isVisible() || !dataSet.isDrawCirclesEnabled() ||
-                    dataSet.getEntryCount() == 0)
+                dataSet.getEntryCount() == 0) {
                 continue;
+            }
 
             mCirclePaintInner.setColor(dataSet.getCircleHoleColor());
 
@@ -639,10 +712,10 @@ public class LineChartRenderer extends LineRadarRenderer {
             float circleRadius = dataSet.getCircleRadius();
             float circleHoleRadius = dataSet.getCircleHoleRadius();
             boolean drawCircleHole = dataSet.isDrawCircleHoleEnabled() &&
-                    circleHoleRadius < circleRadius &&
-                    circleHoleRadius > 0.f;
+                circleHoleRadius < circleRadius &&
+                circleHoleRadius > 0.f;
             boolean drawTransparentCircleHole = drawCircleHole &&
-                    dataSet.getCircleHoleColor() == ColorTemplate.COLOR_NONE;
+                dataSet.getCircleHoleColor() == ColorTemplate.COLOR_NONE;
 
             DataSetImageCache imageCache;
 
@@ -673,12 +746,14 @@ public class LineChartRenderer extends LineRadarRenderer {
 
                 trans.pointValuesToPixel(mCirclesBuffer);
 
-                if (!mViewPortHandler.isInBoundsRight(mCirclesBuffer[0]))
+                if (!mViewPortHandler.isInBoundsRight(mCirclesBuffer[0])) {
                     break;
+                }
 
                 if (!mViewPortHandler.isInBoundsLeft(mCirclesBuffer[0]) ||
-                        !mViewPortHandler.isInBoundsY(mCirclesBuffer[1]))
+                    !mViewPortHandler.isInBoundsY(mCirclesBuffer[1])) {
                     continue;
+                }
 
                 Bitmap circleBitmap = imageCache.getBitmap(j);
 
@@ -698,16 +773,18 @@ public class LineChartRenderer extends LineRadarRenderer {
 
             ILineDataSet set = lineData.getDataSetByIndex(high.getDataSetIndex());
 
-            if (set == null || !set.isHighlightEnabled())
+            if (set == null || !set.isHighlightEnabled()) {
                 continue;
+            }
 
             Entry e = set.getEntryForXValue(high.getX(), high.getY());
 
-            if (!isInBoundsX(e, set))
+            if (!isInBoundsX(e, set)) {
                 continue;
+            }
 
             MPPointD pix = mChart.getTransformer(set.getAxisDependency()).getPixelForValues(e.getX(), e.getY() * mAnimator
-                    .getPhaseY());
+                .getPhaseY());
 
             high.setDraw((float) pix.x, (float) pix.y);
 
@@ -810,34 +887,34 @@ public class LineChartRenderer extends LineRadarRenderer {
                     mCirclePathBuffer.reset();
 
                     mCirclePathBuffer.addCircle(
-                            circleRadius,
-                            circleRadius,
-                            circleRadius,
-                            Path.Direction.CW);
+                        circleRadius,
+                        circleRadius,
+                        circleRadius,
+                        Path.Direction.CW);
 
                     // Cut hole in path
                     mCirclePathBuffer.addCircle(
-                            circleRadius,
-                            circleRadius,
-                            circleHoleRadius,
-                            Path.Direction.CCW);
+                        circleRadius,
+                        circleRadius,
+                        circleHoleRadius,
+                        Path.Direction.CCW);
 
                     // Fill in-between
                     canvas.drawPath(mCirclePathBuffer, mRenderPaint);
                 } else {
 
                     canvas.drawCircle(
-                            circleRadius,
-                            circleRadius,
-                            circleRadius,
-                            mRenderPaint);
+                        circleRadius,
+                        circleRadius,
+                        circleRadius,
+                        mRenderPaint);
 
                     if (drawCircleHole) {
                         canvas.drawCircle(
-                                circleRadius,
-                                circleRadius,
-                                circleHoleRadius,
-                                mCirclePaintInner);
+                            circleRadius,
+                            circleRadius,
+                            circleHoleRadius,
+                            mCirclePaintInner);
                     }
                 }
             }

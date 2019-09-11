@@ -22,14 +22,27 @@ public class YAxisRenderer extends AxisRenderer {
 
     protected YAxis mYAxis;
 
+    protected float[] mRenderLimitLinesBuffer = new float[2];
+    protected float[] mGetTransformedPositionsBuffer = new float[2];
+
+    protected Path mRenderGridLinesPath = new Path();
+    protected Path mRenderLimitLines = new Path();
+    protected Path mDrawZeroLinePath = new Path();
+
+    protected RectF mLimitLineClippingRect = new RectF();
+    protected RectF mGridClippingRect = new RectF();
+    protected RectF mZeroLineClippingRect = new RectF();
+    protected RectF targetBackgroundRect;
+
     protected Paint mZeroLinePaint;
+    protected Paint targetBackgroundPaint;
 
     public YAxisRenderer(ViewPortHandler viewPortHandler, YAxis yAxis, Transformer trans) {
         super(viewPortHandler, trans, yAxis);
 
         this.mYAxis = yAxis;
 
-        if(mViewPortHandler != null) {
+        if (mViewPortHandler != null) {
 
             mAxisLabelPaint.setColor(Color.BLACK);
             mAxisLabelPaint.setTextSize(Utils.convertDpToPixel(10f));
@@ -128,7 +141,6 @@ public class YAxisRenderer extends AxisRenderer {
         }
     }
 
-    protected Path mRenderGridLinesPath = new Path();
     @Override
     public void renderGridLines(Canvas c) {
 
@@ -165,8 +177,6 @@ public class YAxisRenderer extends AxisRenderer {
         }
     }
 
-    protected RectF mGridClippingRect = new RectF();
-
     public RectF getGridClippingRect() {
         mGridClippingRect.set(mViewPortHandler.getContentRect());
         mGridClippingRect.inset(0.f, -mAxis.getGridLineWidth());
@@ -189,7 +199,6 @@ public class YAxisRenderer extends AxisRenderer {
         return p;
     }
 
-    protected float[] mGetTransformedPositionsBuffer = new float[2];
     /**
      * Transforms the values contained in the axis entries to screen pixels and returns them in form of a float array
      * of x- and y-coordinates.
@@ -198,7 +207,7 @@ public class YAxisRenderer extends AxisRenderer {
      */
     protected float[] getTransformedPositions() {
 
-        if(mGetTransformedPositionsBuffer.length != mYAxis.mEntryCount * 2){
+        if (mGetTransformedPositionsBuffer.length != mYAxis.mEntryCount * 2) {
             mGetTransformedPositionsBuffer = new float[mYAxis.mEntryCount * 2];
         }
         float[] positions = mGetTransformedPositionsBuffer;
@@ -211,9 +220,6 @@ public class YAxisRenderer extends AxisRenderer {
         mTrans.pointValuesToPixel(positions);
         return positions;
     }
-
-    protected Path mDrawZeroLinePath = new Path();
-    protected RectF mZeroLineClippingRect = new RectF();
 
     /**
      * Draws the zero line.
@@ -243,9 +249,31 @@ public class YAxisRenderer extends AxisRenderer {
         c.restoreToCount(clipRestoreCount);
     }
 
-    protected Path mRenderLimitLines = new Path();
-    protected float[] mRenderLimitLinesBuffer = new float[2];
-    protected RectF mLimitLineClippingRect = new RectF();
+    public void renderTargetBackground(Canvas c) {
+        MPPointD upper = mTrans.getPixelForValues(0f, mYAxis.getTargetBackground().getTargetUpper());
+        MPPointD lower = mTrans.getPixelForValues(0f, mYAxis.getTargetBackground().getTargetLower());
+
+        Paint p = getTargetBackgroundPaint();
+        RectF r = getTargetBackgroundRect();
+        r.set(mViewPortHandler.contentLeft(), (float) upper.y, mViewPortHandler.contentRight(), (float) lower.y);
+        c.drawRect(r, p);
+    }
+
+    private Paint getTargetBackgroundPaint() {
+        if (targetBackgroundPaint == null) {
+            targetBackgroundPaint = new Paint();
+            targetBackgroundPaint.setColor(mYAxis.getTargetBackground().getColor());
+        }
+        return targetBackgroundPaint;
+    }
+
+    private RectF getTargetBackgroundRect() {
+        if (targetBackgroundRect == null) {
+            targetBackgroundRect = new RectF();
+        }
+        return targetBackgroundRect;
+    }
+
     /**
      * Draws the LimitLines associated with this axis to the screen.
      *

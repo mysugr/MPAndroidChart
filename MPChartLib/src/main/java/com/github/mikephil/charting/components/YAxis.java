@@ -73,13 +73,14 @@ public class YAxis extends AxisBase {
      */
     private YAxisLabelPosition mPosition = YAxisLabelPosition.OUTSIDE_CHART;
 
+    private TargetBackground targetBackground;
+
     /**
      * enum for the position of the y-labels relative to the chart
      */
     public enum YAxisLabelPosition {
-        OUTSIDE_CHART, INSIDE_CHART
+        OUTSIDE_CHART, INSIDE_CHART;
     }
-
     /**
      * the side this axis object represents
      */
@@ -99,15 +100,16 @@ public class YAxis extends AxisBase {
      */
     protected float mMaxWidth = Float.POSITIVE_INFINITY;
 
+
+
     /**
      * Enum that specifies the axis a DataSet should be plotted against, either LEFT or RIGHT.
      *
      * @author Philipp Jahoda
      */
     public enum AxisDependency {
-        LEFT, RIGHT
+        LEFT, RIGHT;
     }
-
     public YAxis() {
         super();
 
@@ -365,6 +367,14 @@ public class YAxis extends AxisBase {
             return true;
         else
             return false;
+    }
+
+    public TargetBackground getTargetBackground() {
+        return targetBackground;
+    }
+
+    public void setTargetBackground(TargetBackground targetBackground) {
+        this.targetBackground = targetBackground;
     }
 
     /**

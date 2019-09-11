@@ -19,7 +19,7 @@ public abstract class BarLineScatterCandleBubbleDataSet<T extends Entry>
     /**
      * default highlight color
      */
-    protected int mHighLightColor = Color.rgb(255, 187, 115);
+    protected int mHighLightColor = Color.BLUE;
 
     public BarLineScatterCandleBubbleDataSet(List<T> yVals, String label) {
         super(yVals, label);

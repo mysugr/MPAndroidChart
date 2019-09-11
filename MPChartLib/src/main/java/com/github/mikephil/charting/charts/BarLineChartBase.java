@@ -230,6 +230,14 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         if (mAxisRight.isEnabled() && mAxisRight.isDrawLimitLinesBehindDataEnabled())
             mAxisRendererRight.renderLimitLines(canvas);
 
+        if (mAxisLeft.getTargetBackground() != null) {
+            mAxisRendererLeft.renderTargetBackground(canvas);
+        }
+
+        if (mAxisRight.getTargetBackground() != null) {
+            mAxisRendererRight.renderTargetBackground(canvas);
+        }
+
         // make sure the data cannot be drawn outside the content-rect
         int clipRestoreCount = canvas.save();
         canvas.clipRect(mViewPortHandler.getContentRect());
@@ -1278,6 +1286,10 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
      */
     public void setKeepPositionOnRotation(boolean keepPositionOnRotation) {
         mKeepPositionOnRotation = keepPositionOnRotation;
+    }
+
+    public void stopDeceleration() {
+        ((BarLineChartTouchListener)mChartTouchListener).stopDeceleration();
     }
 
     /**
