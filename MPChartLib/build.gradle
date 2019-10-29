@@ -6,7 +6,7 @@ buildscript {
     }
 
     ext.publishingInfo = [
-            version      : '3.1.0.mysugr.1',
+            version      : '3.1.0.mysugr.2',
             org          : 'mysugr',
             lib          : 'MPAndroidChart-mysugr',
             group        : 'com.github.PhilJay',

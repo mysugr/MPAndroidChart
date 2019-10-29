@@ -305,11 +305,60 @@ public class LineChartRenderer
             int orangeColor = dataSet.getRangeColors()[1];
             int inRangeColor = dataSet.getRangeColors()[2];
 
-            linearGradient = new LinearGradient(0, 0, 0, mChart.getHeight(),
-                new int[]{redColor, orangeColor, orangeColor, inRangeColor, inRangeColor, orangeColor, orangeColor, redColor},
-                new float[]{hyperCutoff - 0.01f, hyperCutoff, upperRangeCutoff - 0.01f, upperRangeCutoff,
-                    lowerRangeCutoff, lowerRangeCutoff + 0.01f, hypoCutOff, hypoCutOff + 0.01f},
-                Shader.TileMode.CLAMP);
+            // When the hypo/hyper threshold equals the upper/lower target range threshold, there is no intermediate
+            // orange area, therefore the orange part of the gradient has to be removed depending on that
+            boolean hasUpperOrangeArea = outOfRangeMax < hyperGlucoseLimit;
+            boolean hasLowerOrangeArea = outOfRangeMin > hypoGlucoseLimit;
+            int gradientColorCount = 8;
+            if (!hasUpperOrangeArea) {
+                gradientColorCount -= 2;
+            }
+            if (!hasLowerOrangeArea) {
+                gradientColorCount -= 2;
+            }
+
+            int[] gradientColors = new int[gradientColorCount];
+            float[] gradientPositions = new float[gradientColorCount];
+            int i = 0;
+
+            // Red hyper area
+            gradientColors[i] = redColor;
+            gradientPositions[i++] = hyperCutoff - 0.01f;
+
+            // Orange upper out-of-bounds area
+            if (hasUpperOrangeArea) {
+                gradientColors[i] = orangeColor;
+                gradientPositions[i++] = hyperCutoff;
+                gradientColors[i] = orangeColor;
+                gradientPositions[i++] = upperRangeCutoff - 0.01f;
+            }
+
+            // Green target area
+            gradientColors[i] = inRangeColor;
+            gradientPositions[i++] = upperRangeCutoff;
+            gradientColors[i] = inRangeColor;
+            gradientPositions[i++] = lowerRangeCutoff;
+
+            // Orange lower out-of-bounds area
+            if (hasLowerOrangeArea) {
+                gradientColors[i] = orangeColor;
+                gradientPositions[i++] = lowerRangeCutoff + 0.01f;
+                gradientColors[i] = orangeColor;
+                gradientPositions[i++] = hypoCutOff;
+            }
+
+            // Red hypo area
+            gradientColors[i] = redColor;
+            gradientPositions[i] = hypoCutOff + 0.01f;
+
+            linearGradient = new LinearGradient(
+                    0,
+                    0,
+                    0,
+                    mChart.getHeight(),
+                    gradientColors,
+                    gradientPositions,
+                    Shader.TileMode.CLAMP);
         }
         return linearGradient;
     }
