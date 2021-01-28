@@ -122,6 +122,7 @@ public class LineChartRenderer
 
         mRenderPaint.setStrokeWidth(dataSet.getLineWidth());
         mRenderPaint.setPathEffect(dataSet.getDashPathEffect());
+        mRenderPaint.setStrokeCap(dataSet.getStrokeCap());
 
         switch (dataSet.getMode()) {
             default:
@@ -140,6 +141,7 @@ public class LineChartRenderer
         }
 
         mRenderPaint.setPathEffect(null);
+        mRenderPaint.setStrokeCap(LineDataSet.DEFAULT_STROKE_CAP);
     }
 
     protected void drawHorizontalBezier(ILineDataSet dataSet) {
@@ -270,7 +272,6 @@ public class LineChartRenderer
         }
 
         mRenderPaint.setStyle(Paint.Style.STROKE);
-        mRenderPaint.setStrokeCap(Paint.Cap.ROUND);
 
         trans.pathValueToPixel(cubicPath);
 

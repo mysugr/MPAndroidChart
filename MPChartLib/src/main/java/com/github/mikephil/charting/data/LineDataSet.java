@@ -4,6 +4,7 @@ package com.github.mikephil.charting.data;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
+import android.graphics.Paint;
 import android.util.Log;
 
 import com.github.mikephil.charting.formatter.DefaultFillFormatter;
@@ -69,7 +70,8 @@ public class LineDataSet
     private int[] rangeColors = new int[1];
 
     private float[] rangeValues = new float[1];
-
+    
+    private Paint.Cap mStrokeCap = LineDataSet.DEFAULT_STROKE_CAP;
 
     public LineDataSet(List<Entry> yVals, String label) {
         super(yVals, label);
@@ -429,8 +431,18 @@ public class LineDataSet
     public float[] getRangeValues() {
         return rangeValues;
     }
-
-    public void setRangeValues(float[] rangeValues) {
+	
+	@Override
+	public Paint.Cap getStrokeCap() {
+		return mStrokeCap;
+	}
+	
+	@Override
+	public void setStrokeCap(Paint.Cap strokeCap) {
+    	mStrokeCap = strokeCap;
+	}
+	
+	public void setRangeValues(float[] rangeValues) {
         this.rangeValues = rangeValues;
     }
 
@@ -440,4 +452,6 @@ public class LineDataSet
         CUBIC_BEZIER,
         HORIZONTAL_BEZIER
     }
+    
+    public static Paint.Cap DEFAULT_STROKE_CAP = Paint.Cap.BUTT;
 }

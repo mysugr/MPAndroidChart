@@ -1,6 +1,7 @@
 package com.github.mikephil.charting.interfaces.datasets;
 
 import android.graphics.DashPathEffect;
+import android.graphics.Paint;
 
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -105,4 +106,11 @@ public interface ILineDataSet
     int[] getRangeColors();
 
     float[] getRangeValues();
+    
+    /**
+     * @return cap specifies how the start and end of lines are drawn
+     */
+    Paint.Cap getStrokeCap();
+    
+    void setStrokeCap(Paint.Cap strokeCap);
 }
