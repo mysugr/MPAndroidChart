@@ -20,6 +20,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".mysugr.MySugrActivity" />
+        <activity android:name=".mysugr.MySugrLineChartActivity" />
         <activity android:name="LineChartActivity1" />
         <activity android:name="LineChartActivity2" />
         <activity android:name="LineChartTime" />

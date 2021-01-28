@@ -55,7 +55,7 @@ public class MySugrActivity
 		
 		switch (pos) {
 			case 1:
-				i = new Intent(this, LineChartActivity1.class);
+				i = new Intent(this, MySugrLineChartActivity.class);
 				break;
 		}
 		
