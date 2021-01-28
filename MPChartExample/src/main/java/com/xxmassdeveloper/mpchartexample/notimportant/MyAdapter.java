@@ -18,12 +18,12 @@ import java.util.List;
 /**
  * Created by Philipp Jahoda on 07/12/15.
  */
-class MyAdapter extends ArrayAdapter<ContentItem> {
+public class MyAdapter extends ArrayAdapter<ContentItem> {
 
     private final Typeface mTypeFaceLight;
     private final Typeface mTypeFaceRegular;
 
-    MyAdapter(Context context, List<ContentItem> objects) {
+    public MyAdapter(Context context, List<ContentItem> objects) {
         super(context, 0, objects);
 
         mTypeFaceLight = Typeface.createFromAsset(context.getAssets(), "OpenSans-Light.ttf");

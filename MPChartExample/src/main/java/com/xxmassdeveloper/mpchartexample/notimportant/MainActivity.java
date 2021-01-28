@@ -45,6 +45,7 @@ import com.xxmassdeveloper.mpchartexample.ScrollViewActivity;
 import com.xxmassdeveloper.mpchartexample.StackedBarActivity;
 import com.xxmassdeveloper.mpchartexample.StackedBarActivityNegative;
 import com.xxmassdeveloper.mpchartexample.fragments.SimpleChartDemo;
+import com.xxmassdeveloper.mpchartexample.mysugr.MySugrActivity;
 
 import java.util.ArrayList;
 
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         ArrayList<ContentItem> objects = new ArrayList<>();
 
         ////
-        objects.add(0, new ContentItem("Line Charts"));
+        objects.add(0, new ContentItem("MySugr charts", "Custom charts"));
 
         objects.add(1, new ContentItem("Basic", "Simple line chart."));
         objects.add(2, new ContentItem("Multiple", "Show multiple data sets."));
@@ -136,6 +137,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         Intent i = null;
 
         switch (pos) {
+            case 0:
+                i = new Intent(this, MySugrActivity.class);
+                break;
             case 1:
                 i = new Intent(this, LineChartActivity1.class);
                 break;
