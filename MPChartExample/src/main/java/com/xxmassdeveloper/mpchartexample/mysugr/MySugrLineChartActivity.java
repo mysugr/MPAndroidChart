@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.WindowManager;
+
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
@@ -18,15 +19,14 @@ import com.xxmassdeveloper.mpchartexample.notimportant.DemoBase;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.core.content.ContextCompat;
-
 /**
  * Example of a heavily customized {@link LineChart} with limit lines, custom line shapes, etc.
  *
  * @version 3.1.0
  * @since 1.7.4
  */
-public class MySugrLineChartActivity extends DemoBase {
+public class MySugrLineChartActivity
+		extends DemoBase {
 	
 	private LineChart chart;
 	
@@ -80,7 +80,7 @@ public class MySugrLineChartActivity extends DemoBase {
 		xAxis.setAxisMaximum(100f);
 		
 		// add data
-		setData(45, 180);
+		setData();
 		
 		// draw points over time
 		chart.animateX(1500);
@@ -91,8 +91,7 @@ public class MySugrLineChartActivity extends DemoBase {
 	
 	}
 	
-	private void setData(int count, float range) {
-		
+	private void setData() {
 		ArrayList<ILineDataSet> dataSets = new ArrayList<>();
 		List<Entry> entries = getDashedEntries();
 		LineDataSet dashedDataSet = createDashedDataSet(entries);
@@ -102,10 +101,7 @@ public class MySugrLineChartActivity extends DemoBase {
 		LineDataSet gradientDataSet = createGradientDataSet(gradientEntries);
 		dataSets.add(gradientDataSet);
 		
-		// create a data object with the data sets
 		LineData data = new LineData(dataSets);
-		
-		// set data
 		chart.setData(data);
 	}
 	
@@ -124,9 +120,9 @@ public class MySugrLineChartActivity extends DemoBase {
 		gradientDataSet.setColor(Color.GRAY);
 		gradientDataSet.setLineWidth(4f);
 		int[] colors = new int[]{Color.RED, Color.YELLOW, Color.GREEN};
-		//gradientDataSet.setRangeColors(colors);
+		gradientDataSet.setRangeColors(colors);
 		float[] rangeValues = new float[]{80, 60, 40, 20};
-		// gradientDataSet.setRangeValues(rangeValues);
+		gradientDataSet.setRangeValues(rangeValues);
 		gradientDataSet.setColor(Color.GREEN);
 		gradientDataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
 		gradientDataSet.setCubicIntensity(0.35f);
