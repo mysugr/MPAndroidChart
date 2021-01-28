@@ -422,8 +422,15 @@ public class LineDataSet
     public int[] getRangeColors() {
         return rangeColors;
     }
-
-    @Override
+    
+    /**
+     * CAUTION: Experimental API, not everything might work as you expect it!
+     * Colors are set as gradient as according to our use case only.
+     *
+     * Always call {@link #setRangeValues} too!
+     *
+     * @param rangeColors 3 colors have to be set, which are used for the linear gradient.
+     */
     public void setRangeColors(int[] rangeColors) {
         this.rangeColors = rangeColors;
     }
@@ -433,7 +440,16 @@ public class LineDataSet
         return rangeValues;
     }
     
-    @Override
+    /**
+     * CAUTION: Experimental API, not everything might work as you expect it!
+     * Colors are set as gradient as according to our use case only.
+     * Calling this method on a dataset ignores its {@link #getColor()} and draws the gradient
+     * colors of {@link #getRangeColors()} instead.
+     *
+     * Always call {@link #setRangeColors} too!
+     *
+     * @param rangeValues 4 range values have to be set the correspond to ranges on the y axis
+     */
     public void setRangeValues(float[] rangeValues) {
         this.rangeValues = rangeValues;
     }
@@ -442,8 +458,10 @@ public class LineDataSet
 	public Paint.Cap getStrokeCap() {
 		return mStrokeCap;
 	}
-	
-	@Override
+    
+    /**
+     * @param strokeCap specifies how the start and end of lines are drawn
+     */
 	public void setStrokeCap(Paint.Cap strokeCap) {
     	mStrokeCap = strokeCap;
 	}
