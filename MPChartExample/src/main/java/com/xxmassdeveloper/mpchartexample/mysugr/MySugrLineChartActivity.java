@@ -118,7 +118,7 @@ public class MySugrLineChartActivity extends DemoBase {
 		
 		List<Entry> gradientEntries = getDashedEntries();
 		LineDataSet gradientDataSet = createGradientDataSet(gradientEntries);
-		dataSets.add(gradientDataSet);
+		//dataSets.add(gradientDataSet);
 		
 		// create a data object with the data sets
 		LineData data = new LineData(dataSets);
@@ -129,9 +129,10 @@ public class MySugrLineChartActivity extends DemoBase {
 	
 	private LineDataSet createDashedDataSet(List<Entry> entries) {
 		LineDataSet dashedDataSet = new LineDataSet(entries, "dashed");
+		dashedDataSet.enableDashedLine(1f, 35f, 0f);
 		dashedDataSet.setColor(Color.GRAY);
-		dashedDataSet.setLineWidth(4f);
-		dashedDataSet.enableDashedLine(5f, 30f, 0f);
+		dashedDataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+		dashedDataSet.setLineWidth(3f);
 		return dashedDataSet;
 	}
 	
@@ -140,9 +141,10 @@ public class MySugrLineChartActivity extends DemoBase {
 		gradientDataSet.setColor(Color.GRAY);
 		gradientDataSet.setLineWidth(4f);
 		int[] colors = new int[]{Color.RED, Color.YELLOW, Color.GREEN};
-		gradientDataSet.setRangeColors(colors);
+		//gradientDataSet.setRangeColors(colors);
 		float[] rangeValues = new float[]{80, 60, 40, 20};
-		gradientDataSet.setRangeValues(rangeValues);
+		//gradientDataSet.setRangeValues(rangeValues);
+		gradientDataSet.setColor(Color.GREEN);
 		gradientDataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
 		gradientDataSet.setCubicIntensity(0.35f);
 		return gradientDataSet;
