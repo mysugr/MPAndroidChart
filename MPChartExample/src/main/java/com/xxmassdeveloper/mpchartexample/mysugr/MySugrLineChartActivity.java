@@ -1,35 +1,17 @@
 
 package com.xxmassdeveloper.mpchartexample.mysugr;
 
-import android.Manifest;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.DashPathEffect;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
+import android.graphics.Paint;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.WindowManager;
-import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.TextView;
-
-import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.IFillFormatter;
-import com.github.mikephil.charting.highlight.Highlight;
-import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
-import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
-import com.github.mikephil.charting.utils.Utils;
 import com.xxmassdeveloper.mpchartexample.R;
 import com.xxmassdeveloper.mpchartexample.notimportant.DemoBase;
 
@@ -118,7 +100,7 @@ public class MySugrLineChartActivity extends DemoBase {
 		
 		List<Entry> gradientEntries = getDashedEntries();
 		LineDataSet gradientDataSet = createGradientDataSet(gradientEntries);
-		//dataSets.add(gradientDataSet);
+		dataSets.add(gradientDataSet);
 		
 		// create a data object with the data sets
 		LineData data = new LineData(dataSets);
@@ -131,8 +113,9 @@ public class MySugrLineChartActivity extends DemoBase {
 		LineDataSet dashedDataSet = new LineDataSet(entries, "dashed");
 		dashedDataSet.enableDashedLine(1f, 35f, 0f);
 		dashedDataSet.setColor(Color.GRAY);
-		dashedDataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+		dashedDataSet.setMode(LineDataSet.Mode.LINEAR);
 		dashedDataSet.setLineWidth(3f);
+		dashedDataSet.setStrokeCap(Paint.Cap.ROUND);
 		return dashedDataSet;
 	}
 	
@@ -143,7 +126,7 @@ public class MySugrLineChartActivity extends DemoBase {
 		int[] colors = new int[]{Color.RED, Color.YELLOW, Color.GREEN};
 		//gradientDataSet.setRangeColors(colors);
 		float[] rangeValues = new float[]{80, 60, 40, 20};
-		//gradientDataSet.setRangeValues(rangeValues);
+		// gradientDataSet.setRangeValues(rangeValues);
 		gradientDataSet.setColor(Color.GREEN);
 		gradientDataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
 		gradientDataSet.setCubicIntensity(0.35f);
