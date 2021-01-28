@@ -423,6 +423,7 @@ public class LineDataSet
         return rangeColors;
     }
 
+    @Override
     public void setRangeColors(int[] rangeColors) {
         this.rangeColors = rangeColors;
     }
@@ -430,6 +431,11 @@ public class LineDataSet
     @Override
     public float[] getRangeValues() {
         return rangeValues;
+    }
+    
+    @Override
+    public void setRangeValues(float[] rangeValues) {
+        this.rangeValues = rangeValues;
     }
 	
 	@Override
@@ -441,10 +447,6 @@ public class LineDataSet
 	public void setStrokeCap(Paint.Cap strokeCap) {
     	mStrokeCap = strokeCap;
 	}
-	
-	public void setRangeValues(float[] rangeValues) {
-        this.rangeValues = rangeValues;
-    }
 
     public enum Mode {
         LINEAR,

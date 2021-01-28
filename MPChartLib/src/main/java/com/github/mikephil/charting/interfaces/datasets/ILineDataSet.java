@@ -104,8 +104,30 @@ public interface ILineDataSet
     IFillFormatter getFillFormatter();
 
     int[] getRangeColors();
-
+    
+    /**
+	 * CAUTION: Experimental API, not everything might work as you expect it!
+     * Colors are set as gradient as according to our use case only.
+     *
+     * Always call {@link #setRangeValues} too!
+     *
+     * @param rangeColors 3 colors have to be set, which are used for the linear gradient.
+     */
+    void setRangeColors(int[] rangeColors);
+    
     float[] getRangeValues();
+    
+    /**
+     * CAUTION: Experimental API, not everything might work as you expect it!
+	 * Colors are set as gradient as according to our use case only.
+     * Calling this method on a dataset ignores its {@link #getColor()} and draws the gradient
+     * colors of {@link #getRangeColors()} instead.
+     *
+     * Always call {@link #setRangeColors} too!
+     *
+     * @param rangeValues 4 range values have to be set the correspond to ranges on the y axis
+     */
+    void setRangeValues(float[] rangeValues);
     
     /**
      * @return cap specifies how the start and end of lines are drawn
