@@ -19,23 +19,21 @@ trying to get the artifacts from a remote repository like jCenter. That
 way you can conveniently do work on the library which is thereafter
 quickly accessible on your app's side.
 
-**On the library side:**
-
-1. Perform your changes
-1. Run the `publishToMavenLocal` task
-
-**On the app side:**
-
-1. On the *first time* Android Studio needs to know the new location of
-   the local artifacts, so clean the dependencies cache (use File /
-   Invalidate Caches / Restart" in Android studio
-1. Once Android Studio knows, you can just use File / Sync with file
-   system each time you used `publishToMavenLocal` (it works in an
-   instant)
-
 ## Publishing
 
-When you've done your work and want to publish your artifacts to the
-public repository you have to push your changes to Bintray. To do that
-just use the `bintrayUpload` task. Make sure you created the version
-you intend to publish on Bintray!
+### Set-up key
+1. Get the Android GPG key from 1Password and copy it to the folder
+2. Fill out the needed properties in local-properties (can also be found in 1Password)
+3. NEVER push anything of this
+4. Now you are good to go
+
+### Publish locally
+1. Perform your changes
+2. Run the `publishToMavenLocal` task
+
+### Publish to the JFrog repository
+To make your changes available for QA or release builds, they need to be published to the
+JFrog repository.
+1. Increase the version in build.gradle
+1. Merge your changes to the mysugr-custom branch
+1. Run the `bintrayUpload` task

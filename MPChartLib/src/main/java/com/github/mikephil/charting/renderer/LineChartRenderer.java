@@ -122,6 +122,14 @@ public class LineChartRenderer
 
         mRenderPaint.setStrokeWidth(dataSet.getLineWidth());
         mRenderPaint.setPathEffect(dataSet.getDashPathEffect());
+        mRenderPaint.setStrokeCap(dataSet.getStrokeCap());
+    
+        if (dataSet.getRangeValues() != null && dataSet.getRangeValues().length >= 4) {
+            Shader shader = getGradientShader(dataSet);
+            mRenderPaint.setShader(shader);
+        } else {
+            mRenderPaint.setColor(dataSet.getColor());
+        }
 
         switch (dataSet.getMode()) {
             default:
@@ -140,6 +148,8 @@ public class LineChartRenderer
         }
 
         mRenderPaint.setPathEffect(null);
+        mRenderPaint.setStrokeCap(LineDataSet.DEFAULT_STROKE_CAP);
+        mRenderPaint.setShader(null);
     }
 
     protected void drawHorizontalBezier(ILineDataSet dataSet) {
@@ -262,15 +272,7 @@ public class LineChartRenderer
             drawCubicFill(mBitmapCanvas, dataSet, cubicFillPath, trans, mXBounds);
         }
 
-        if (dataSet.getRangeValues() != null && dataSet.getRangeValues().length >= 4) {
-            Shader shader = getGradientShader(dataSet);
-            mRenderPaint.setShader(shader);
-        } else {
-            mRenderPaint.setColor(dataSet.getColor());
-        }
-
         mRenderPaint.setStyle(Paint.Style.STROKE);
-        mRenderPaint.setStrokeCap(Paint.Cap.ROUND);
 
         trans.pathValueToPixel(cubicPath);
 

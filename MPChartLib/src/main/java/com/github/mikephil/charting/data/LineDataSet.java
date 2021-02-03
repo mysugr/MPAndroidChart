@@ -4,6 +4,7 @@ package com.github.mikephil.charting.data;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
+import android.graphics.Paint;
 import android.util.Log;
 
 import com.github.mikephil.charting.formatter.DefaultFillFormatter;
@@ -69,7 +70,8 @@ public class LineDataSet
     private int[] rangeColors = new int[1];
 
     private float[] rangeValues = new float[1];
-
+    
+    private Paint.Cap mStrokeCap = LineDataSet.DEFAULT_STROKE_CAP;
 
     public LineDataSet(List<Entry> yVals, String label) {
         super(yVals, label);
@@ -420,7 +422,15 @@ public class LineDataSet
     public int[] getRangeColors() {
         return rangeColors;
     }
-
+    
+    /**
+     * CAUTION: Experimental API, not everything might work as you expect it!
+     * Colors are set as gradient as according to our use case only.
+     *
+     * Always call {@link #setRangeValues} too!
+     *
+     * @param rangeColors 3 colors have to be set, which are used for the linear gradient.
+     */
     public void setRangeColors(int[] rangeColors) {
         this.rangeColors = rangeColors;
     }
@@ -429,10 +439,32 @@ public class LineDataSet
     public float[] getRangeValues() {
         return rangeValues;
     }
-
+    
+    /**
+     * CAUTION: Experimental API, not everything might work as you expect it!
+     * Colors are set as gradient as according to our use case only.
+     * Calling this method on a dataset ignores its {@link #getColor()} and draws the gradient
+     * colors of {@link #getRangeColors()} instead.
+     *
+     * Always call {@link #setRangeColors} too!
+     *
+     * @param rangeValues 4 range values have to be set the correspond to ranges on the y axis
+     */
     public void setRangeValues(float[] rangeValues) {
         this.rangeValues = rangeValues;
     }
+	
+	@Override
+	public Paint.Cap getStrokeCap() {
+		return mStrokeCap;
+	}
+    
+    /**
+     * @param strokeCap specifies how the start and end of lines are drawn
+     */
+	public void setStrokeCap(Paint.Cap strokeCap) {
+    	mStrokeCap = strokeCap;
+	}
 
     public enum Mode {
         LINEAR,
@@ -440,4 +472,6 @@ public class LineDataSet
         CUBIC_BEZIER,
         HORIZONTAL_BEZIER
     }
+    
+    public static Paint.Cap DEFAULT_STROKE_CAP = Paint.Cap.BUTT;
 }
